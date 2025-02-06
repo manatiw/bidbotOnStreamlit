@@ -1,18 +1,18 @@
 import pandas as pd
+import streamlit as sl
 import scrapers.utils
 from config.configLoader import TITLE_KEYWORDS, COMPANY_KEYWORDS, AWARD_SELECTED_COLUMNS, TENDER_SELECTED_COLUMNS, NOT_AWARD_SELECTED_COLUMNS
 from urllib.parse import quote
-import streamlit as sl
+
 
 
 class G0vScraper:
-    def __init__(self, startDate, config_path):
+    def __init__(self, start_date, config_path):
         self.config = scrapers.utils.load_config(config_path)
-        self.baseUrl = self.config['websites']['g0v']['api']['base_url']
-        self.titleApi = self.config['websites']['g0v']['api']['endpoints']['search_title']
-        self.companyApi = self.config['websites']['g0v']['api']['endpoints']['search_company']
-        self.startDate = startDate
-        self.page_content = None
+        self.base_url = self.config['websites']['g0v']['api']['base_url']
+        self.title_api = self.config['websites']['g0v']['api']['endpoints']['search_title']
+        self.company_api = self.config['websites']['g0v']['api']['endpoints']['search_company']
+        self.start_date = start_date
 
 
     def write_to_df(self, record, record_type):
@@ -37,27 +37,27 @@ class G0vScraper:
         return df
 
 
-    def search_listings(self, keyword, keywordType):
+    def search_listings(self, keyword, keyword_type):
         full_records = pd.DataFrame()
-        endpoint = keywordType
+        endpoint = keyword_type
         query = quote(f'{keyword}')
         page = 1
 
-        api = f'{self.baseUrl}{endpoint}query={query}&page={page}'
+        api = f'{self.base_url}{endpoint}query={query}&page={page}'
         json_data = scrapers.utils.request(api).json()
 
         raw_records_df = pd.DataFrame(json_data['records'])
         records_df = raw_records_df[['date', 'filename', 'brief', 'tender_api_url']]
-        filtered_df = records_df[records_df['date'] >= self.startDate]
+        filtered_df = records_df[records_df['date'] >= self.start_date]
         full_records = pd.concat([full_records, filtered_df], ignore_index=True)
         # next page
         while len(filtered_df) == 100:
             page += 1
-            api = f'{self.baseUrl}{endpoint}query={query}&page={page}'
+            api = f'{self.base_url}{endpoint}query={query}&page={page}'
             json_data = scrapers.utils.request(api).json()
             raw_records_df = pd.DataFrame(json_data['records'])
             records_df = raw_records_df[['date', 'filename', 'brief', 'tender_api_url']]
-            filtered_df = records_df[records_df['date'] >= self.startDate]
+            filtered_df = records_df[records_df['date'] >= self.start_date]
             full_records = pd.concat([full_records, filtered_df], ignore_index=True)
 
         full_records['tender_type'] = full_records['brief'].apply(lambda x: x['type'])
@@ -97,6 +97,8 @@ class G0vScraper:
     
 
     def run_scraper(self):
+        sl.write("g0v scraper is now running:")
+
         new_tender_df = pd.DataFrame()
         new_award_df = pd.DataFrame()
 
@@ -107,7 +109,7 @@ class G0vScraper:
             keyword_placeholder.text(f"Processing keyword: {keyword}")
 
 
-            title_search_df = self.search_listings(keyword, self.titleApi)
+            title_search_df = self.search_listings(keyword, self.title_api)
             tender_df, award_df = self.scrape_details(title_search_df)
 
             tender_df.insert(0, 'keyword', keyword)
@@ -121,7 +123,7 @@ class G0vScraper:
         for keyword in COMPANY_KEYWORDS:
             keyword_placeholder.text(f"Processing keyword: {keyword}")
 
-            company_search_df = self.search_listings(keyword, self.companyApi)
+            company_search_df = self.search_listings(keyword, self.company_api)
             tender_df, award_df = self.scrape_details(company_search_df)
             tender_df.insert(0, 'keyword', keyword)
             award_df.insert(0, 'keyword', keyword)

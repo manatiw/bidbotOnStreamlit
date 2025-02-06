@@ -13,7 +13,8 @@
     "websites":{
         "pcc_gov": {
             "name": "政府採購網",
-            "url": ""
+            "baseUrl": "https://web.pcc.gov.tw/",
+            "listing_base_url": "https://web.pcc.gov.tw/prkms/tender/common/bulletion/readBulletion"
         },
         "g0v": {
             "name": "g0v政府採購網api",
