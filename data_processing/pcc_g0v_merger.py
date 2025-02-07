@@ -64,5 +64,5 @@ class PccG0vMerger:
         merged_tender_df = self.pcc_tender_df.merge(g0v_tender_df, on=['date', 'title','keyword', 'job_number', '機關名稱', '領投開標:截止投標', 'url'], how='outer')
         merged_award_df = self.pcc_award_df.merge(g0v_award_df, on=['date', 'title', 'keyword', 'type', 'job_number', '機關名稱', 'url'], how='outer')
 
-        # Need to delete duplicates after merging
         return merged_tender_df, merged_award_df
+    

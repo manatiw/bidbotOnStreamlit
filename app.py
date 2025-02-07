@@ -1,10 +1,14 @@
 import streamlit as sl
 import os
+from data_processing.data_cleaner import delete_duplicates
+from data_processing.data_exporter import save_dataframes_as_csv
+
 from datetime import datetime
 from scrapers.g0vScraper import G0vScraper
 from scrapers.pccScraper import PccScraper
 from data_processing.pcc_g0v_merger import PccG0vMerger
 from config.configLoader import CONFIG_PATH
+
 
 
 
@@ -19,7 +23,7 @@ ck = sl.text_area("company kw")
 
 with sl.form("設定"):
     start_date = sl.date_input("開始日期", value=None)
-    sl.checkbox("AI選擇相關標案", value=True)
+    sl.checkbox("AI選擇相關標案(not yet deployed)", value=True)
     s_state = sl.form_submit_button("完成設定")
     if s_state:
         if start_date is None or start_date > datetime.now().date():
@@ -42,9 +46,15 @@ with sl.form("設定"):
             sl.write("awards_df:")
             sl.write(awards_df)
 
+            delete_duplicates(tenders_df, awards_df)
+            sl.write("cleaned_df:")
+            sl.write(tenders_df)
+            sl.write(awards_df)
 
 
             #progrss bar move to scraper.py
             bar=sl.progress(0)
 
-sl.button("下載csv")
+            save_csv = sl.button("下載csv")
+            if save_csv:
+                save_dataframes_as_csv(tenders_df, awards_df)
