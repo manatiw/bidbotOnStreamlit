@@ -1,5 +1,6 @@
 import streamlit as sl
 import os
+import json
 from data_processing.data_cleaner import delete_duplicates
 from data_processing.data_exporter import save_dataframes_as_csv
 
@@ -11,26 +12,62 @@ from config.configLoader import CONFIG_PATH
 
 
 
+# Streamlit configuration
+sl.set_page_config(page_title="標案下載", page_icon='🐄')
+today_date = datetime.today().strftime('%Y-%m-%d')
 
-sl.markdown("<h1 style='text-align: center;'>Moldev相關標案下載</h1>", unsafe_allow_html=True)
-sl.markdown("---")
+# Load configuration, keywords
+with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+    config = json.load(f)
+sl.session_state["title_keywords"] = config['keywords']['by_title']
+sl.session_state["company_keywords"] = config['keywords']['by_company']
 
 
-#Display keywords and might open for keyword editing
-tk = sl.text_area("title kw")
-ck = sl.text_area("company kw")
+# Set new session state
+if 'scraping_status' not in sl.session_state:
+    tenders_df = None
+    awards_df = None
+    sl.session_state['tender'] = None
+    sl.session_state['award'] = None
+    sl.session_state['scraping_status'] = 'idle'
+    
+
+    
+
+# UI 1
+if sl.session_state['scraping_status'] == 'idle':
+
+    # Title
+    sl.markdown("<h1 style='text-align: center;'>Moldev相關標案下載</h1>", unsafe_allow_html=True)
+    sl.markdown("---")
 
 
-with sl.form("設定"):
-    start_date = sl.date_input("開始日期", value=None)
-    sl.checkbox("AI選擇相關標案(not yet deployed)", value=True)
-    s_state = sl.form_submit_button("完成設定")
+    # Preview Keywords
+    tk = sl.write(sl.session_state["title_keywords"])
+    ck = sl.write(sl.session_state["company_keywords"])
+
+    # Form
+    with sl.form("設定"):
+        start_date = sl.date_input("開始日期", value=None)
+
+        # model.py implementation
+        sl.checkbox("AI選擇相關標案(not yet deployed)", value=True)
+
+        s_state = sl.form_submit_button("完成設定")
+
+
+
+    # Submitted
     if s_state:
+        # Invalid date
         if start_date is None or start_date > datetime.now().date():
             sl.warning("請輸入有效開始日期！")
+
+
         else:
             formatted_date = int(start_date.strftime("%Y%m%d"))
 
+            # Run the scrapers and merger
             g0vScraper = G0vScraper(formatted_date, CONFIG_PATH)
             g0vTenderDf, g0vAwardDf = g0vScraper.run_scraper()
 
@@ -40,21 +77,80 @@ with sl.form("設定"):
             scrapeDataMerger = PccG0vMerger(pccTenderDf, pccAwardDf, g0vTenderDf, g0vAwardDf)
             tenders_df, awards_df = scrapeDataMerger.run_merger()
 
-            #preview button
-            sl.write("tenders_df:")
-            sl.write(tenders_df)
-            sl.write("awards_df:")
-            sl.write(awards_df)
-
+            # Clean duplicates
             delete_duplicates(tenders_df, awards_df)
-            sl.write("cleaned_df:")
-            sl.write(tenders_df)
-            sl.write(awards_df)
 
 
-            #progrss bar move to scraper.py
-            bar=sl.progress(0)
+            # If scraped not empty -> Preview, Download
+            if tenders_df is not None and awards_df is not None:
+                sl.session_state['tender'] = tenders_df
+                sl.session_state['award'] = awards_df
+                sl.session_state['scraping_status'] = 'done'
+                sl.rerun()
 
-            save_csv = sl.button("下載csv")
-            if save_csv:
-                save_dataframes_as_csv(tenders_df, awards_df)
+
+            # If scraped empty -> Warning
+            else:
+                sl.warning("No data available")
+                sl.session_state['scraping_status'] = 'done'
+                sl.rerun()
+
+
+# UI 2
+else:
+    # Title
+    sl.markdown("<h2 style='text-align: center;'>Moldev相關標案下載</h2>", unsafe_allow_html=True)
+
+    # Function to toggle preview visibility
+    def toggle_preview():
+        # Toggle the state of the preview flag in session state
+        sl.session_state['preview_open'] = not sl.session_state.get('preview_open', False)
+    
+    # Function to convert DataFrame to CSV
+    def convert_df_to_csv(df):
+        return df.to_csv(index=False).encode('utf-8')
+    
+    # Preview and download button
+    if 'tender' in sl.session_state and 'award' in sl.session_state:
+        tender_csv = convert_df_to_csv(sl.session_state['tender'])
+        award_csv = convert_df_to_csv(sl.session_state['award'])
+
+        # Download buttons for tender and award data
+        tender_filename = f"{today_date}_tender_data.csv"
+        sl.download_button(
+            label="下載招標資料 CSV",
+            data=tender_csv,
+            file_name=tender_filename,
+            mime="text/csv"
+        )
+        award_filename = f"{today_date}_award_data.csv"
+        sl.download_button(
+            label="下載決標資料 CSV",
+            data=award_csv,
+            file_name=award_filename,
+            mime="text/csv"
+        )
+    else:
+        sl.warning("No data to download.")
+
+    preview_btn = sl.button("預覽", on_click=toggle_preview)
+
+    # Show preview if preview_open is True
+    if 'preview_open' in sl.session_state and sl.session_state['preview_open']:
+        if 'tender' in sl.session_state and 'award' in sl.session_state:
+            sl.write('招標資料')
+            sl.write(sl.session_state['tender'])
+            sl.write('決標資料')
+            sl.write(sl.session_state['award'])
+        else:
+            sl.warning("No data to preview.")
+
+
+    def reset_state():
+        # Clear session state (removes all session data)
+        sl.session_state.clear()
+
+        sl.rerun()  # Forces a rerun, showing the initial form
+
+        # Reset button
+    sl.button("重置", on_click=reset_state)

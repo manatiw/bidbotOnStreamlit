@@ -32,7 +32,7 @@ class PccScraper:
 
             while True:
                 html = scrapers.utils.request(self.listing_base_url + tenderQueryStrings).text
-                soup = BeautifulSoup(html, 'html')
+                soup = BeautifulSoup(html, features="html.parser")
                 tbody = soup.find("tbody")
 
                 # extract data
@@ -83,7 +83,7 @@ class PccScraper:
             # Award search result
             awardQueryStrings = "?querySentence=" + keyword + "&tenderStatusType=%E6%B1%BA%E6%A8%99&sortCol=AWARD_NOTICE_DATE&timeRange=" + str(self.search_year_minguo) + "&pageSize=100"
             html = scrapers.utils.request(self.listing_base_url + awardQueryStrings).text
-            soup = BeautifulSoup(html, 'html')
+            soup = BeautifulSoup(html, features="html.parser")
             tbody = soup.find("tbody")
 
             # extract data
