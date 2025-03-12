@@ -17,8 +17,7 @@ from model.text_classification import gpt_classification
 # Streamlit configuration
 sl.set_page_config(page_title="標案下載", page_icon='🐄')
 utc_time = datetime.now(pytz.utc)
-taiwan_time = utc_time.astimezone(pytz.timezone('Asia/Taipei'))
-today_date = taiwan_time.strftime('%Y-%m-%d')
+today_date = utc_time.astimezone(pytz.timezone('Asia/Taipei'))
 #today_date = datetime.today().strftime('%Y-%m-%d')
 ai_threshold = 70
 
@@ -54,9 +53,7 @@ if sl.session_state['scraping_status'] == 'idle':
 
     sl.write(f"Current date: {today_date}")
     sl.write(today_date)
-    sl.write(type(today_date))
     sl.write(datetime.now().date())
-    sl.write(type(datetime.now().date()))
     sl.write(f"### Title Keywords: \n{tk_str}")
     sl.write(f"### Company Keywords: \n{ck_str}")
 
