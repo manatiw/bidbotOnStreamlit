@@ -48,8 +48,8 @@ if sl.session_state['scraping_status'] == 'idle':
     tk = sl.write(sl.session_state["title_keywords"])
     ck = sl.write(sl.session_state["company_keywords"])'''
     
-    tk_str = ", ".join("title_keywords")
-    ck_str = ", ".join("company_keywords")
+    tk_str = ", ".join(sl.session_state["title_keywords"])
+    ck_str = ", ".join(sl.session_state["company_keywords"])
 
     sl.write(f"### Title Keywords: \n{tk_str}")
     sl.write(f"### Company Keywords: \n{ck_str}")
