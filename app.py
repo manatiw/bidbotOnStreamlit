@@ -89,8 +89,8 @@ if sl.session_state['scraping_status'] == 'idle':
             # Clean duplicates
             delete_duplicates(tenders_df, awards_df)
 
-            # Add AI scoring
-            sl.write("scoring...")
+            # Add AI score
+            sl.write("Calculating Relevance...")
             tenders_df['score'] = tenders_df['title'].apply(gpt_classification)
             awards_df['score'] = awards_df['title'].apply(gpt_classification)
 
