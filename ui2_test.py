@@ -24,3 +24,7 @@ if 'preview_open' in sl.session_state and sl.session_state['preview_open']:
         sl.write(sl.session_state['award'])
     else:
         sl.warning("No data to preview.")
+
+
+
+ai_filtered = sl.checkbox(f"AI選擇相關標案 (threshold={ai_threshold})", value=True)

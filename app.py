@@ -9,12 +9,14 @@ from scrapers.g0vScraper import G0vScraper
 from scrapers.pccScraper import PccScraper
 from data_processing.pcc_g0v_merger import PccG0vMerger
 from config.configLoader import CONFIG_PATH
+from model.text_classification import gpt_classification
 
 
 
 # Streamlit configuration
 sl.set_page_config(page_title="標案下載", page_icon='🐄')
 today_date = datetime.today().strftime('%Y-%m-%d')
+ai_threshold = 70
 
 # Load configuration, keywords
 with open(CONFIG_PATH, "r", encoding="utf-8") as f:
@@ -42,17 +44,14 @@ if sl.session_state['scraping_status'] == 'idle':
     sl.markdown("---")
 
 
-    # Preview Keywords
+    '''# Preview Keywords
     tk = sl.write(sl.session_state["title_keywords"])
-    ck = sl.write(sl.session_state["company_keywords"])
+    ck = sl.write(sl.session_state["company_keywords"])'''
 
     # Form
     with sl.form("設定"):
         start_date = sl.date_input("開始日期", value=None)
-
-        # model.py implementation
-        sl.checkbox("AI選擇相關標案(not yet deployed)", value=True)
-
+        sl.write(f"AI選擇相關標案 (threshold={ai_threshold})")
         s_state = sl.form_submit_button("完成設定")
 
 
@@ -80,12 +79,18 @@ if sl.session_state['scraping_status'] == 'idle':
             # Clean duplicates
             delete_duplicates(tenders_df, awards_df)
 
+            # Add AI scoring
+            sl.write("scoring...")
+            tenders_df['score'] = tenders_df['title'].apply(gpt_classification)
+            awards_df['score'] = awards_df['title'].apply(gpt_classification)
+
 
             # If scraped not empty -> Preview, Download
             if tenders_df is not None and awards_df is not None:
                 sl.session_state['tender'] = tenders_df
                 sl.session_state['award'] = awards_df
                 sl.session_state['scraping_status'] = 'done'
+                sl.session_state['ai_threshold'] = ai_threshold
                 sl.rerun()
 
 
@@ -100,7 +105,7 @@ if sl.session_state['scraping_status'] == 'idle':
 else:
     # Title
     sl.markdown("<h2 style='text-align: center;'>Moldev相關標案下載</h2>", unsafe_allow_html=True)
-
+    
     # Function to toggle preview visibility
     def toggle_preview():
         # Toggle the state of the preview flag in session state
@@ -108,25 +113,47 @@ else:
     
     # Function to convert DataFrame to CSV
     def convert_df_to_csv(df):
-        return df.to_csv(index=False).encode('utf-8')
+        return df.to_csv(index=False).encode('utf-8-sig')
     
     # Preview and download button
     if 'tender' in sl.session_state and 'award' in sl.session_state:
-        tender_csv = convert_df_to_csv(sl.session_state['tender'])
-        award_csv = convert_df_to_csv(sl.session_state['award'])
+
+        # Remove irrelevant
+        ai_filered_tenders_df = sl.session_state['tender'][sl.session_state['tender']['score'] >= sl.session_state['ai_threshold']]
+        ai_filtered_awards_df = sl.session_state['award'][sl.session_state['award']['score'] >= sl.session_state['ai_threshold']]
+
+
+        tender_csv = convert_df_to_csv(ai_filered_tenders_df)
+        award_csv = convert_df_to_csv(ai_filtered_awards_df)
+        full_tender_csv = convert_df_to_csv(sl.session_state['tender'])
+        full_award_csv = convert_df_to_csv(sl.session_state['award'])
 
         # Download buttons for tender and award data
-        tender_filename = f"{today_date}_tender_data.csv"
+        filtered_tender_filename = f"{today_date}_filtered_tender_data.csv"
         sl.download_button(
             label="下載招標資料 CSV",
             data=tender_csv,
+            file_name=filtered_tender_filename,
+            mime="text/csv"
+        )
+        filtered_award_filename = f"{today_date}_filtered_award_data.csv"
+        sl.download_button(
+            label="下載招標資料 CSV",
+            data=award_csv,
+            file_name=filtered_award_filename,
+            mime="text/csv"
+        )
+        tender_filename = f"{today_date}_tender_data.csv"
+        sl.download_button(
+            label="下載完整關鍵字招標資料 CSV",
+            data=full_tender_csv,
             file_name=tender_filename,
             mime="text/csv"
         )
         award_filename = f"{today_date}_award_data.csv"
         sl.download_button(
-            label="下載決標資料 CSV",
-            data=award_csv,
+            label="下載完整關鍵字決標資料 CSV",
+            data=full_award_csv,
             file_name=award_filename,
             mime="text/csv"
         )
