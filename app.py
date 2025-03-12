@@ -52,9 +52,10 @@ if sl.session_state['scraping_status'] == 'idle':
     tk_str = ", ".join(sl.session_state["title_keywords"])
     ck_str = ", ".join(sl.session_state["company_keywords"])
 
+    sl.write(f"Current date: {today_date})
+
     sl.write(f"### Title Keywords: \n{tk_str}")
     sl.write(f"### Company Keywords: \n{ck_str}")
-    sl.write(today_date)
 
     # Form
     with sl.form("設定"):
