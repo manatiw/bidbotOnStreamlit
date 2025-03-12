@@ -44,10 +44,7 @@ if sl.session_state['scraping_status'] == 'idle':
     sl.markdown("---")
 
 
-    '''# Preview Keywords
-    tk = sl.write(sl.session_state["title_keywords"])
-    ck = sl.write(sl.session_state["company_keywords"])'''
-    
+    # Preview Keywords
     tk_str = ", ".join(sl.session_state["title_keywords"])
     ck_str = ", ".join(sl.session_state["company_keywords"])
 
