@@ -13,8 +13,7 @@ except FileNotFoundError:
 
 oak = sl.secrets['OPENAI_API_KEY']
 try:
-    with oak:
-        openai.api_key = oak
+    openai.api_key = oak
 
 except FileNotFoundError:
     print(f"File not found at {file_path}")
