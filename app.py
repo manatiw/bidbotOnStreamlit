@@ -52,8 +52,8 @@ if sl.session_state['scraping_status'] == 'idle':
     ck_str = ", ".join(sl.session_state["company_keywords"])
 
     sl.write(f"Current date: {today_date}")
-    sl.write(today_date)
-    sl.write(datetime.now().date())
+    #sl.write(today_date)
+    #sl.write(datetime.now().date())
     sl.write(f"### Title Keywords: \n{tk_str}")
     sl.write(f"### Company Keywords: \n{ck_str}")
 
@@ -68,7 +68,7 @@ if sl.session_state['scraping_status'] == 'idle':
     # Submitted
     if s_state:
         # Invalid date
-        if start_date is None or start_date > datetime.now().date():
+        if start_date is None or start_date > today_date:
             sl.warning("請輸入有效開始日期！")
 
 
