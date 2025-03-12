@@ -45,8 +45,14 @@ if sl.session_state['scraping_status'] == 'idle':
 
 
     '''# Preview Keywords
-    #tk = sl.write(sl.session_state["title_keywords"])
-    #ck = sl.write(sl.session_state["company_keywords"])'''
+    tk = sl.write(sl.session_state["title_keywords"])
+    ck = sl.write(sl.session_state["company_keywords"])'''
+    
+    tk_str = ", ".join(tk)  # Assuming tk is a list, you can adjust as needed
+    ck_str = ", ".join(ck)  # Same for ck
+
+    st.write(f"### Title Keywords: \n{tk_str}")
+    st.write(f"### Company Keywords: \n{ck_str}")
 
     # Form
     with sl.form("設定"):
