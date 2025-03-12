@@ -68,7 +68,7 @@ if sl.session_state['scraping_status'] == 'idle':
     # Submitted
     if s_state:
         # Invalid date
-        if start_date is None or start_date > datetime.now().date():
+        if start_date is None or start_date > today_date:
             sl.warning("請輸入有效開始日期！")
 
 
