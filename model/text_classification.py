@@ -15,14 +15,14 @@ except FileNotFoundError:
 def gpt_classification(prompt):
     response = openai.chat.completions.create(
         model='gpt-3.5-turbo',
-        temperature = 1.0,
+        temperature = 0.7,
         messages = [
                 {
                     "role": "system",
                     "content": (
                         "You are a classification AI that determines the relevance of Traditional Chinese bidding titles "
                         "to Molecular Devices' products, specifically plate readers and cell imaging systems.\n"
-                        "Output a confidence score from 0 to 100%, where:\n"
+                        "Output a confidence score in from 0 to 100%, where:\n"
                         "- 100% means 'highly relevant'\n"
                         "- 0% means 'completely irrelevant'\n"
                         "- Titles unrelated to biology will be likely irrelevent\n\n"
@@ -40,7 +40,12 @@ def gpt_classification(prompt):
             ]
 
     )
-    return response.choices[0].message.content.strip()
+    percentage = int(response.choices[0].message.content.strip().rstrip('%'))
+    return percentage
+
+#def predict(title):
+
+
 
 if __name__ == "__main__":
     print(gpt_classification('高解析微區光譜儀'))

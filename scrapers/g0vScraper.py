@@ -3,6 +3,7 @@ import streamlit as sl
 import scrapers.utils
 from config.configLoader import TITLE_KEYWORDS, COMPANY_KEYWORDS, AWARD_SELECTED_COLUMNS, TENDER_SELECTED_COLUMNS, NOT_AWARD_SELECTED_COLUMNS
 from urllib.parse import quote
+import time
 
 
 
@@ -73,6 +74,7 @@ class G0vScraper:
         awards_df = pd.DataFrame()
 
         for index, row in record_df.iterrows():
+            time.sleep(1)
             api_url = row['tender_api_url']
             filename = row['filename']
             json_data = scrapers.utils.request(api_url).json()
