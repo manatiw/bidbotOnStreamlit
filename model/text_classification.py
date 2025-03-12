@@ -11,10 +11,10 @@ try:
 except FileNotFoundError:
     print(f"File not found at {file_path}")'''
 
-key = sl.secrets['OPENAI_API_KEY']
+oak = sl.secrets['OPENAI_API_KEY']
 try:
-    with key:
-        openai.api_key = key
+    with oak:
+        openai.api_key = oak
 
 except FileNotFoundError:
     print(f"File not found at {file_path}")
