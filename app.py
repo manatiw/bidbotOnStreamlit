@@ -53,7 +53,10 @@ if sl.session_state['scraping_status'] == 'idle':
     ck_str = ", ".join(sl.session_state["company_keywords"])
 
     sl.write(f"Current date: {today_date}")
+    sl.write(today_date)
+    sl.write(type(today_date))
     sl.write(datetime.now().date())
+    sl.write(type(datetime.now().date()))
     sl.write(f"### Title Keywords: \n{tk_str}")
     sl.write(f"### Company Keywords: \n{ck_str}")
 
