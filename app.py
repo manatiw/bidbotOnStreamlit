@@ -1,6 +1,7 @@
 import streamlit as sl
 import os
 import json
+import pytz
 from data_processing.data_cleaner import delete_duplicates
 from data_processing.data_exporter import save_dataframes_as_csv
 
@@ -15,7 +16,10 @@ from model.text_classification import gpt_classification
 
 # Streamlit configuration
 sl.set_page_config(page_title="標案下載", page_icon='🐄')
-today_date = datetime.today().strftime('%Y-%m-%d')
+utc_time = datetime.now(pytz.utc)
+taiwan_time = utc_time.astimezone(pytz.timezone('Asia/Taipei'))
+today_date = taiwan_time.strftime('%Y-%m-%d')
+#today_date = datetime.today().strftime('%Y-%m-%d')
 ai_threshold = 70
 
 # Load configuration, keywords
