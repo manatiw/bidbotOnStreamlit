@@ -17,7 +17,8 @@ from model.text_classification import gpt_classification
 # Streamlit configuration
 sl.set_page_config(page_title="標案下載", page_icon='🐄')
 utc_time = datetime.now(pytz.utc)
-today_date = utc_time.astimezone(pytz.timezone('Asia/Taipei'))
+taiwan_time = utc_time.astimezone(pytz.timezone('Asia/Taipei'))
+today_date = taiwan_time.date()
 #today_date = datetime.today().strftime('%Y-%m-%d')
 ai_threshold = 70
 
