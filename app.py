@@ -50,6 +50,7 @@ if sl.session_state['scraping_status'] == 'idle':
 
     sl.write(f"### Title Keywords: \n{tk_str}")
     sl.write(f"### Company Keywords: \n{ck_str}")
+    sl.write(today_date)
 
     # Form
     with sl.form("設定"):
