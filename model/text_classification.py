@@ -1,11 +1,20 @@
 # check Streamlit Secrets ".streamlit/secrets.toml" to hide api key when deploy (gpt_key.txt is ignored by git)
 import openai
+import streamlit as sl
 
 
-file_path = 'config/gpt_key.txt'
+'''file_path = 'config/gpt_key.txt'
 try:
     with open(file_path, 'r') as file:
         openai.api_key = file.read().strip('\n')
+
+except FileNotFoundError:
+    print(f"File not found at {file_path}")'''
+
+api_key = sl.secrets['OPENAI_API_KEY']
+try:
+    with api_key:
+        openai.api_key = api_key
 
 except FileNotFoundError:
     print(f"File not found at {file_path}")
