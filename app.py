@@ -91,8 +91,12 @@ if sl.session_state['scraping_status'] == 'idle':
 
             # Add AI score
             sl.write("Calculating Relevance...")
-            tenders_df['score'] = tenders_df['title'].apply(gpt_classification)
-            awards_df['score'] = awards_df['title'].apply(gpt_classification)
+            tender_score = tenders_df['title'].apply(gpt_classification)
+            award_score = awards_df['title'].apply(gpt_classification)
+
+            tenders_df.insert(0, 'score', tender_score) 
+            awards_df.insert(0, 'score', award_score) 
+
 
 
             # If scraped not empty -> Preview, Download
