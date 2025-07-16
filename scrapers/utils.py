@@ -23,6 +23,9 @@ def load_config(config_path):
         return json.load(f)
 
 
+import asyncio
+import json
+from playwright.async_api import async_playwright
 
 class BrowserResponse:
     def __init__(self, json_data):
@@ -32,30 +35,27 @@ class BrowserResponse:
         return self._json
 
 def request(api):
-    return asyncio.run(_browser_fetch(api))  # ← async stays inside, rest of your code stays normal
-
+    return asyncio.run(_browser_fetch(api))  # Sync wrapper for Streamlit compatibility
 
 async def _browser_fetch(api_url):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
 
-        print(f"Fetching from: {url}")
-        await page.goto(url, timeout=60000)
+        print(f"Fetching from: {api_url}")  # ← FIXED: use api_url, not undefined `url`
+        await page.goto(api_url, timeout=60000)
         await page.wait_for_timeout(2000)
 
-        # Some APIs return JSON directly in the <pre> or <body>
         raw_text = await page.inner_text("pre, body")
 
         try:
             data = json.loads(raw_text)
             print("✅ Successfully parsed JSON!")
-            print("First few keys:", list(data.keys()) if isinstance(data, dict) else "Not a dict")
             return BrowserResponse(data)
         except json.JSONDecodeError as e:
-            print("❌ Failed to parse JSON:", str(e))
-            print("Raw response snippet:\n", raw_text[:500])
-            return None
+            print(f"❌ Failed to parse JSON: {e}")
+            print("Raw snippet:\n", raw_text[:500])
+            return BrowserResponse({"records": []})  # Always return an object with .json()
 
 
 '''def request(api):
