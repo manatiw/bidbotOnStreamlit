@@ -20,7 +20,9 @@ from playwright.async_api import async_playwright
         print(f"Failed to fetch data. Status code: {response.status_code}")
         return None'''
 
-
+def load_config(config_path):
+    with open(config_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 class BrowserResponse:
