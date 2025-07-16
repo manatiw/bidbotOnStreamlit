@@ -1,41 +1,7 @@
 # playwright update
-import nest_asyncio
-import asyncio
-from playwright.async_api import async_playwright
-import json
-import streamlit as sl
-
-nest_asyncio.apply()
-
-async def test_json_api_with_playwright(url):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-
-        print(f"Fetching from: {url}")
-        await page.goto(url, timeout=60000)
-        await page.wait_for_timeout(2000)
-
-        # Some APIs return JSON directly in the <pre> or <body>
-        raw_text = await page.inner_text("pre, body")
-
-        try:
-            data = json.loads(raw_text)
-            print("✅ Successfully parsed JSON!")
-            print("First few keys:", list(data.keys()) if isinstance(data, dict) else "Not a dict")
-            return data
-        except json.JSONDecodeError as e:
-            print("❌ Failed to parse JSON:", str(e))
-            print("Raw response snippet:\n", raw_text[:500])
-            return None
-
-# Replace this with your real API endpoint
-url = "https://pcc-api.openfun.app/api/searchbytitle?query=%E7%B4%B0%E8%83%9E&page=1"
-data = asyncio.run(test_json_api_with_playwright(url))
-sl.markdown(data)
 
 
-'''import subprocess
+import subprocess
 subprocess.run(["playwright", "install", "chromium"], check=True)
 try:
     subprocess.run(["playwright", "install", "chromium"], check=True)
@@ -241,4 +207,4 @@ else:
         sl.rerun()  # Forces a rerun, showing the initial form
 
         # Reset button
-    sl.button("重置", on_click=reset_state)'''
+    sl.button("重置", on_click=reset_state)
