@@ -25,34 +25,27 @@ def load_config(config_path):
         return json.load(f)
 
 
+async def request(url):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
 
-def _browser_fetch(api_url):
-    async def _fetch():
-        async with async_playwright() as p:
-            try:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                print(f"🔍 Visiting: {api_url}")
-                await page.goto(api_url, timeout=60000)
-                await page.wait_for_timeout(2000)
+        print(f"Fetching from: {url}")
+        await page.goto(url, timeout=60000)
+        await page.wait_for_timeout(2000)
 
-                raw_text = await page.inner_text("pre, body")
-                print("📥 Raw response (first 300 chars):", raw_text[:300])
+        # Some APIs return JSON directly in the <pre> or <body>
+        raw_text = await page.inner_text("pre, body")
 
-                if not raw_text.strip():
-                    print(f"⚠️ Empty response at {api_url}")
-                    return BrowserResponse({"records": []})
-
-                json_data = json.loads(raw_text)
-                print("✅ JSON parsed with keys:", list(json_data.keys()))
-                return BrowserResponse(json_data)
-
-            except Exception as e:
-                print(f"❌ Failed to fetch/parse from {api_url}: {e}")
-                return BrowserResponse({"records": []})
-
-    return asyncio.run(_fetch())
-
+        try:
+            data = json.loads(raw_text)
+            print("✅ Successfully parsed JSON!")
+            print("First few keys:", list(data.keys()) if isinstance(data, dict) else "Not a dict")
+            return data
+        except json.JSONDecodeError as e:
+            print("❌ Failed to parse JSON:", str(e))
+            print("Raw response snippet:\n", raw_text[:500])
+            return None
 
 
 '''def request(api):
