@@ -34,7 +34,7 @@ from playwright.async_api import async_playwright
     def json(self):
         return self._json'''
 
-def request(api):
+def requestpw(api):
     return asyncio.run(_browser_fetch(api))  # Sync wrapper for Streamlit compatibility
 
 async def _browser_fetch(api_url):
@@ -55,10 +55,10 @@ async def _browser_fetch(api_url):
         except json.JSONDecodeError as e:
             print(f"❌ Failed to parse JSON: {e}")
             print("Raw snippet:\n", raw_text[:500])
-            return BrowserResponse({"records": []})  # Always return an object with .json()
+            return ({"records": []})  # Always return an object with .json()
 
 
-'''def request(api):
+def request(api):
     retries=5
     backoff=2
     attempt = 0
@@ -78,4 +78,4 @@ async def _browser_fetch(api_url):
             return None
     
     print("Max retries reached. Returning None.")
-    return None'''
+    return None
