@@ -13,6 +13,9 @@ from config.configLoader import CONFIG_PATH
 from model.text_classification import gpt_classification
 
 
+# playwright update
+import subprocess
+subprocess.run(["playwright", "install", "chromium"], check=True)
 
 # Streamlit configuration
 sl.set_page_config(page_title="標案下載", page_icon='🐄')
