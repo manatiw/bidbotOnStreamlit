@@ -1,4 +1,11 @@
 # playwright update
+import nest_asyncio
+import asyncio
+from playwright.async_api import async_playwright
+import json
+
+nest_asyncio.apply()
+
 async def test_json_api_with_playwright(url):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
