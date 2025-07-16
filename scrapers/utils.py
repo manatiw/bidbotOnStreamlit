@@ -27,17 +27,17 @@ import asyncio
 import json
 from playwright.async_api import async_playwright
 
-class BrowserResponse:
+'''class BrowserResponse:
     def __init__(self, json_data):
-        self._json = json_data
+        self._json = json_data'''
 
     def json(self):
         return self._json
 
-def request(api):
-    return asyncio.run(_browser_fetch(api))  # Sync wrapper for Streamlit compatibility
+'''def request(api):
+    return asyncio.run(_browser_fetch(api))  # Sync wrapper for Streamlit compatibility'''
 
-async def _browser_fetch(api_url):
+async def request(api_url):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
