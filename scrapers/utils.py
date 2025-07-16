@@ -23,16 +23,16 @@ def load_config(config_path):
         return json.load(f)
 
 
-import asyncio
+'''import asyncio
 import json
 from playwright.async_api import async_playwright
 
-'''class BrowserResponse:
+class BrowserResponse:
     def __init__(self, json_data):
         self._json = json_data
 
     def json(self):
-        return self._json'''
+        return self._json
 
 def requestpw(api):
     return asyncio.run(_browser_fetch(api))  # Sync wrapper for Streamlit compatibility
@@ -55,7 +55,7 @@ async def _browser_fetch(api_url):
         except json.JSONDecodeError as e:
             print(f"❌ Failed to parse JSON: {e}")
             print("Raw snippet:\n", raw_text[:500])
-            return ({"records": []})  # Always return an object with .json()
+            return ({"records": []})  # Always return an object with .json()'''
 
 
 def request(api):
