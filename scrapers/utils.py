@@ -2,8 +2,6 @@ import requests
 import json
 import time
 
-
-
 import nest_asyncio
 nest_asyncio.apply()
 
@@ -25,6 +23,15 @@ def load_config(config_path):
         return json.load(f)
 
 
+
+class BrowserResponse:
+    def __init__(self, json_data):
+        self._json = json_data
+
+    def json(self):
+        return self._json
+
+
 async def request(url):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -41,7 +48,7 @@ async def request(url):
             data = json.loads(raw_text)
             print("✅ Successfully parsed JSON!")
             print("First few keys:", list(data.keys()) if isinstance(data, dict) else "Not a dict")
-            return data
+            return BrowserResponse(data)
         except json.JSONDecodeError as e:
             print("❌ Failed to parse JSON:", str(e))
             print("Raw response snippet:\n", raw_text[:500])
