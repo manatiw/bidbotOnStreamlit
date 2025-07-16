@@ -34,8 +34,8 @@ from playwright.async_api import async_playwright
     def json(self):
         return self._json'''
 
-'''def request(api):
-    return asyncio.run(_browser_fetch(api))  # Sync wrapper for Streamlit compatibility'''
+def request(api):
+    return asyncio.run(_browser_fetch(api))  # Sync wrapper for Streamlit compatibility
 
 async def request(api_url):
     async with async_playwright() as p:
@@ -51,7 +51,7 @@ async def request(api_url):
         try:
             data = json.loads(raw_text)
             print("✅ Successfully parsed JSON!")
-            return BrowserResponse(data)
+            return data
         except json.JSONDecodeError as e:
             print(f"❌ Failed to parse JSON: {e}")
             print("Raw snippet:\n", raw_text[:500])
