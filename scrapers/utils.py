@@ -25,31 +25,6 @@ def load_config(config_path):
         return json.load(f)
 
 
-class BrowserResponse:
-    def __init__(self, json_data):
-        self._json = json_data
-
-    def json(self):
-        return self._json
-
-
-def request(api):
-    retries = 5
-    backoff = 2
-    attempt = 0
-
-    while attempt < retries:
-        try:
-            return _browser_fetch(api)
-        except Exception as e:
-            wait_time = backoff * (2 ** attempt)
-            print(f"Retry {attempt + 1} failed for {api}: {e}")
-            time.sleep(wait_time)
-            attempt += 1
-
-    print("Max retries reached. Returning empty response.")
-    return BrowserResponse({"records": []})
-
 
 def _browser_fetch(api_url):
     async def _fetch():
@@ -57,19 +32,23 @@ def _browser_fetch(api_url):
             try:
                 browser = await p.chromium.launch(headless=True)
                 page = await browser.new_page()
+                print(f"🔍 Visiting: {api_url}")
                 await page.goto(api_url, timeout=60000)
                 await page.wait_for_timeout(2000)
 
                 raw_text = await page.inner_text("pre, body")
+                print("📥 Raw response (first 300 chars):", raw_text[:300])
+
                 if not raw_text.strip():
                     print(f"⚠️ Empty response at {api_url}")
                     return BrowserResponse({"records": []})
 
                 json_data = json.loads(raw_text)
+                print("✅ JSON parsed with keys:", list(json_data.keys()))
                 return BrowserResponse(json_data)
 
             except Exception as e:
-                print(f"❌ Error during browser fetch for {api_url}: {e}")
+                print(f"❌ Failed to fetch/parse from {api_url}: {e}")
                 return BrowserResponse({"records": []})
 
     return asyncio.run(_fetch())
