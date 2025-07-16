@@ -16,6 +16,10 @@ from model.text_classification import gpt_classification
 # playwright update
 import subprocess
 subprocess.run(["playwright", "install", "chromium"], check=True)
+try:
+    subprocess.run(["playwright", "install", "chromium"], check=True)
+except Exception as e:
+    print(f"Playwright install failed or already done: {e}")
 
 # Streamlit configuration
 sl.set_page_config(page_title="標案下載", page_icon='🐄')
