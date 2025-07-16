@@ -45,7 +45,7 @@ class G0vScraper:
         page = 1
 
         api = f'{self.base_url}{endpoint}query={query}&page={page}'
-        json_data = scrapers.utils.requestpw(api).json()
+        json_data = scrapers.utils.request(api).json()
 
         raw_records_df = pd.DataFrame(json_data['records'])
         records_df = raw_records_df[['date', 'filename', 'brief', 'tender_api_url']]
