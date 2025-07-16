@@ -22,8 +22,30 @@ def load_config(config_path):
         return json.load(f)
 
 
+import json
+from playwright.async_api import async_playwright
+import asyncio
 
-class BrowserResponse:
+async def browser_request(api_url):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+        await page.goto(api_url, timeout=60000)
+        await page.wait_for_timeout(2000)  # wait for content to load
+
+        raw_text = await page.inner_text("pre, body")
+        try:
+            data = json.loads(raw_text)
+            return data
+        except Exception as e:
+            print(f"❌ Failed to parse JSON from {api_url}")
+            print("Raw content:", raw_text[:500])
+            return None
+
+def request(api_url):
+    return asyncio.run(browser_request(api_url))
+
+'''class BrowserResponse:
     def __init__(self, json_data):
         self._json = json_data
 
@@ -65,7 +87,7 @@ def _browser_fetch(api_url):
                 print(f"❌ JSON parse failed at {api_url}: {e}")
                 return BrowserResponse({"records": []})
 
-    return asyncio.run(_fetch())
+    return asyncio.run(_fetch())'''
 
 
 
