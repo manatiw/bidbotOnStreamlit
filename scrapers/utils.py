@@ -3,10 +3,14 @@ import json
 import time
 
 
-import asyncio
+
+import nest_asyncio
+nest_asyncio.apply()
+
 from playwright.async_api import async_playwright
 
 
+# old version do not use
 '''def request(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -17,35 +21,9 @@ from playwright.async_api import async_playwright
         return None'''
 
 
-def load_config(config_path):
-    with open(config_path, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
-import json
-from playwright.async_api import async_playwright
-import asyncio
-
-async def browser_request(api_url):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        await page.goto(api_url, timeout=60000)
-        await page.wait_for_timeout(2000)  # wait for content to load
-
-        raw_text = await page.inner_text("pre, body")
-        try:
-            data = json.loads(raw_text)
-            return data
-        except Exception as e:
-            print(f"❌ Failed to parse JSON from {api_url}")
-            print("Raw content:", raw_text[:500])
-            return None
-
-def request(api_url):
-    return asyncio.run(browser_request(api_url))
-
-'''class BrowserResponse:
+class BrowserResponse:
     def __init__(self, json_data):
         self._json = json_data
 
@@ -74,20 +52,25 @@ def request(api):
 def _browser_fetch(api_url):
     async def _fetch():
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            await page.goto(api_url, timeout=60000)
-            await page.wait_for_timeout(2000)
-
-            raw_text = await page.inner_text("pre, body")
             try:
+                browser = await p.chromium.launch(headless=True)
+                page = await browser.new_page()
+                await page.goto(api_url, timeout=60000)
+                await page.wait_for_timeout(2000)
+
+                raw_text = await page.inner_text("pre, body")
+                if not raw_text.strip():
+                    print(f"⚠️ Empty response at {api_url}")
+                    return BrowserResponse({"records": []})
+
                 json_data = json.loads(raw_text)
                 return BrowserResponse(json_data)
+
             except Exception as e:
-                print(f"❌ JSON parse failed at {api_url}: {e}")
+                print(f"❌ Error during browser fetch for {api_url}: {e}")
                 return BrowserResponse({"records": []})
 
-    return asyncio.run(_fetch())'''
+    return asyncio.run(_fetch())
 
 
 
