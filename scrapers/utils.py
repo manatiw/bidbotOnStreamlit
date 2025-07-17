@@ -2,10 +2,10 @@ import requests
 import json
 import time
 
-import nest_asyncio
+'''import nest_asyncio
 nest_asyncio.apply()
 
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright'''
 
 
 # old version do not use
